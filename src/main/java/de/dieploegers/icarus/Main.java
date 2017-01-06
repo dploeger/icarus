@@ -248,7 +248,8 @@ public class Main {
             "Main",
             "Modify an ical file",
             options,
-            "foot",
+            "Please visit https://github.com/dploeger/icarus for further " +
+                "information",
             true
         );
     }
