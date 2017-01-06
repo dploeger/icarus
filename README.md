@@ -1,5 +1,6 @@
 # icarus - iCal batch processor
 [![Travis](https://img.shields.io/travis/dploeger/icarus)](https://travis-ci.org/dploeger/icarus)
+
 ![icarus](design/logo.png)
 
 ## Introduction
