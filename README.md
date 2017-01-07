@@ -73,6 +73,9 @@ you'll get the processed data back.
 Refer to the [API-Docs](https://dploeger.github.io/icarus/apidocs/index.html)
 for more information.
 
+You can use the icarus.lib.jar for library use. I will be
+providing icarus over Maven some time later.
+
 ## Extending icarus
 
 Currently, icarus does all the processing for which
