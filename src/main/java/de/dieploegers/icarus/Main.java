@@ -1,35 +1,23 @@
 package de.dieploegers.icarus;
 
-import de.dieploegers.icarus.exceptions.ProcessException;
 import de.dieploegers.icarus.modifier.Modifier;
-import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.component.VEvent;
 import org.apache.commons.cli.*;
-import org.reflections.Reflections;
+import org.apache.commons.io.IOUtils;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.io.*;
 
 public class Main {
-    public static void main(String[] args) throws java.text.ParseException,
-        IOException, URISyntaxException {
+    public static void main(String[] args) {
         Options options = new Options();
+
+        // Add CLI options
 
         options.addOption(
             Option.builder("h")
-            .longOpt("help")
-            .desc("Show this help")
-            .build()
+                .longOpt("help")
+                .desc("Show this help")
+                .build()
         );
 
         options.addOption(
@@ -56,36 +44,39 @@ public class Main {
                 .build()
         );
 
-        // Search for modifiers
+        // Instantiate processor
 
-        Reflections reflections = new Reflections(
-            "de.dieploegers.icarus.modifier"
-        );
+        Processor processor = null;
+        try {
+            processor = new Processor();
+        } catch (InstantiationException | IllegalAccessException |
+            ClassNotFoundException e) {
+            System.out.println(
+                "Error scanning modifiers: " + e.toString()
+            );
+            System.exit(1);
+        }
 
-        List<Modifier> modifiers = new ArrayList<>();
+        // Add modifier options
 
-        for (
-            Class<? extends Modifier> modifier :
-            reflections.getSubTypesOf(Modifier.class)
-            ) {
-            try {
-                modifiers.add(
-                    (Modifier) Class.forName(modifier.getName()).newInstance()
+        for (Modifier modifier : processor.getModifiers()) {
+            for (ModifierOption option : modifier.getOptions()) {
+                Option.Builder optionBuilder = Option.builder();
+
+                optionBuilder.longOpt(option.getKey());
+                optionBuilder.desc(option.getDescription());
+
+                if (option.getHasValue()) {
+                    optionBuilder.hasArg();
+                }
+
+                options.addOption(
+                    optionBuilder.build()
                 );
-            } catch (InstantiationException | IllegalAccessException |
-                ClassNotFoundException e) {
-                System.out.println(
-                    "Error scanning modifiers: " + e.toString()
-                );
-                System.exit(1);
             }
         }
 
-        for (Modifier modifier : modifiers) {
-            for (Option option : modifier.getOptions()) {
-                options.addOption(option);
-            }
-        }
+        // Parse commandline
 
         CommandLine commandLine = null;
         try {
@@ -108,6 +99,28 @@ public class Main {
             System.exit(0);
         }
 
+        // Build up optionstore
+
+        OptionStore optionStore = new OptionStore();
+
+        for (Modifier modifier: processor.getModifiers()) {
+            for (ModifierOption option: modifier.getOptions()) {
+                if (commandLine.hasOption(option.getKey())) {
+                    ModifierOption commandOption = new ModifierOption(
+                        option.getKey()
+                    );
+                    if (option.getHasValue()) {
+                        commandOption.setValue(
+                            commandLine.getOptionValue(option.getKey())
+                        );
+                    }
+                    optionStore.addOption(commandOption);
+                }
+            }
+        }
+
+        // Load ICS file/stream
+
         InputStream stream = null;
         if (commandLine.getArgList().size() == 0) {
             stream = System.in;
@@ -123,129 +136,72 @@ public class Main {
             }
         }
 
-        CalendarBuilder builder = new CalendarBuilder();
-
-        Calendar calendar = null;
+        StringWriter writer = new StringWriter();
         try {
-            calendar = builder.build(stream);
+            IOUtils.copy(stream, writer, "UTF-8");
         } catch (IOException e) {
-            System.out.println("Error reading file.");
+            System.out.println("Can not read calendar");
             usage(options);
-        } catch (ParserException e) {
-            System.out.println("Error parsing file.");
-            usage(options);
-        }
-
-        if (calendar == null) {
-            System.out.println("Error loading calendar");
             System.exit(1);
         }
+        String iCalData = writer.toString();
 
-        Date dateFrom = null;
+        // Set from/until/query
 
         if (commandLine.hasOption("from")) {
-            dateFrom = new SimpleDateFormat("yyyyMMddHHmmss").parse(
-                commandLine.getOptionValue("from")
+            optionStore.addOption(
+                ModifierOption.withValue(
+                    "from",
+                    commandLine.getOptionValue("from")
+                )
             );
         }
-
-        Date dateUntil = null;
 
         if (commandLine.hasOption("until")) {
-            dateUntil = new SimpleDateFormat("yyyyMMddHHmmss").parse(
-                commandLine.getOptionValue("until")
+            optionStore.addOption(
+                ModifierOption.withValue(
+                    "until",
+                    commandLine.getOptionValue("until")
+                )
             );
         }
 
-        List<VEvent> matchedEvents = new ArrayList<>();
-
-        for (CalendarComponent component : calendar.getComponents()) {
-            if (component.getClass().getSimpleName().equals("VEvent")) {
-                VEvent event = (VEvent) component;
-
-                if (
-                    !commandLine.hasOption("query") ||
-                        event.getName().matches(
-                            commandLine.getOptionValue("query")
-                        )
-                    ) {
-
-                    // Skip events not in the requested timeline
-
-                    boolean dateFiltered = false;
-
-                    if (
-                        dateFrom != null &&
-                            (
-                                event.getStartDate().getDate().before(dateFrom) ||
-                                    event.getEndDate().getDate().before(dateFrom)
-                            )
-                        ) {
-                        dateFiltered = true;
-                    }
-
-                    if (
-                        dateUntil != null &&
-                            (
-                                event.getEndDate().getDate().after(dateUntil) ||
-                                    event.getEndDate().getDate().after(dateUntil)
-                            )
-                        ) {
-                        dateFiltered = true;
-                    }
-
-                    if (!dateFiltered) {
-
-                        matchedEvents.add(event);
-
-                        for (Modifier modifier : modifiers) {
-                            try {
-                                modifier.process(
-                                    commandLine,
-                                    calendar,
-                                    event
-                                );
-                            } catch (ProcessException e) {
-                                System.out.println(
-                                    "Error modifying event: " + e.toString()
-                                );
-                                System.exit(1);
-                            }
-                        }
-
-                    }
-
-                }
-            }
+        if (commandLine.hasOption("query")) {
+            optionStore.addOption(
+                ModifierOption.withValue(
+                    "query",
+                    commandLine.getOptionValue("query")
+                )
+            );
         }
 
-        for (Modifier modifier : modifiers) {
-            try {
-                modifier.finalize(
-                    commandLine,
-                    calendar,
-                    matchedEvents
-                );
-            } catch (ProcessException e) {
-                System.out.println(
-                    "Error finalizing events: " + e.toString()
-                );
-                System.exit(1);
-            }
+        // Do the processing
+
+        try {
+            System.out.println(processor.process(optionStore, iCalData));
+            System.exit(0);
+        } catch (IOException | ParserException e) {
+            System.out.println("Error parsing calendar: " + e.toString());
+            usage(options);
+        } catch (java.text.ParseException e) {
+            System.out.println("Error parsing from or until dates: " + e
+                .toString());
+            usage(options);
         }
-
-        System.out.println(calendar.toString());
-
-        System.exit(0);
 
     }
+
+    /**
+     * Show usage information
+     * @param options The generated CLI options
+     */
 
     private static void usage(Options options) {
         HelpFormatter formatter = new HelpFormatter();
 
         formatter.printHelp(
-            "Main",
-            "Modify an ical file",
+            "icarus.jar",
+            "iCal batch processor",
             options,
             "Please visit https://github.com/dploeger/icarus for further " +
                 "information",

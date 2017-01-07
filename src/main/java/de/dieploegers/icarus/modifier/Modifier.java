@@ -1,10 +1,10 @@
 package de.dieploegers.icarus.modifier;
 
+import de.dieploegers.icarus.ModifierOption;
+import de.dieploegers.icarus.OptionStore;
 import de.dieploegers.icarus.exceptions.ProcessException;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.component.VEvent;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
 
 import java.util.List;
 
@@ -19,18 +19,18 @@ public interface Modifier {
      * @return A list of options to add
      */
 
-    List<Option> getOptions();
+    List<ModifierOption> getOptions();
 
     /**
      * Process an event
      *
-     * @param commandLine The commandline instance holding program arguments
-     * @param calendar    The calendar in process
-     * @param event       The event to process
+     * @param options  Options set for this modifier
+     * @param calendar The calendar in process
+     * @param event    The event to process
      * @throws ProcessException Exception processing the events
      */
 
-    void process(CommandLine commandLine, Calendar calendar, VEvent event)
+    void process(OptionStore options, Calendar calendar, VEvent event)
         throws ProcessException;
 
     /**
@@ -39,13 +39,13 @@ public interface Modifier {
      *
      * The method is called regardless of query, from and until arguments.
      *
-     * @param commandLine The commandline instance holding program arguments
-     * @param calendar The calendar in process
+     * @param options   Options set for this modifier
+     * @param calendar      The calendar in process
      * @param matchedEvents A list of matched events
      * @throws ProcessException Exception processing the events
      */
     void finalize(
-        CommandLine commandLine, Calendar calendar, List<VEvent>
+        OptionStore options, Calendar calendar, List<VEvent>
         matchedEvents
     ) throws
         ProcessException;

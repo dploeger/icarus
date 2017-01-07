@@ -5,16 +5,14 @@ import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.security.Permission;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Main Tester.
- *
- * @author <Authors name>
- * @version 1.0
- * @since <pre>Jan 5, 2017</pre>
  */
 public class MainTest {
 
@@ -29,17 +27,10 @@ public class MainTest {
     public void after() throws Exception {
     }
 
-    /**
-     * Method: main(String[] args)
-     */
-    @Test
-    public void testAddAlarm() throws Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(baos);
+    @Test()
+    public void testCall() {
 
-        System.setOut(ps);
-
-        exit.expectSystemExitWithStatus(0);
+        this.exit.expectSystemExitWithStatus(0);
 
         Main.main(new String[]{
             "--query=.*",
@@ -47,99 +38,36 @@ public class MainTest {
             "src/test/resources/test.ics"
         });
 
-        String result = baos.toString();
-
-        Matcher addAlarmMatcher = Pattern.compile(
-            "TRIGGER:PT1H"
-        ).matcher(result);
-
-        Assert.assertTrue(
-            "AddAlarm wasn't processed",
-            addAlarmMatcher.find()
-        );
-
     }
 
-    /**
-     * Method: main(String[] args)
-     */
-    @Test
-    public void testAllDayTo() throws Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(baos);
+    @Test()
+    public void testInvalidFile() {
 
-        System.setOut(ps);
-
-        exit.expectSystemExitWithStatus(0);
+        this.exit.expectSystemExitWithStatus(1);
 
         Main.main(new String[]{
             "--query=.*",
-            "--allDayTo=19:00-19:05",
-            "--timezone=Europe/Berlin",
-            "src/test/resources/test.ics"
+            "--alarmBefore=1",
+            "src/test/resources/none.ics"
         });
-
-        String result = baos.toString();
-
-        Matcher allDayMatcher = Pattern.compile(
-            "DTSTART;TZID=Europe/Berlin:20171227T200000"
-        ).matcher(result);
-
-        Assert.assertTrue(
-            "AllDayTo wasn't processed",
-            allDayMatcher.find()
-        );
-
-    }
-
-    /**
-     * Method: main(String[] args)
-     */
-    @Test
-    public void testRemoveEvent() throws Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(baos);
-
-        System.setOut(ps);
-
-        exit.expectSystemExitWithStatus(0);
-
-        Main.main(new String[]{
-            "--query=.*",
-            "--from=20170410000000",
-            "--until=20170423235959",
-            "--removeEvent",
-            "src/test/resources/test.ics"
-        });
-
-        String result = baos.toString();
-
-        Matcher allDayMatcher = Pattern.compile(
-            "Osterferien 2017 Nordrhein-Westfalen"
-        ).matcher(result);
-
-        Assert.assertFalse(
-            "RemoveEvent wasn't processed",
-            allDayMatcher.find()
-        );
 
     }
 
     @Test
-    public void testStdin() throws Exception {
+    public void testStdin() {
 
-        FileInputStream fileInputStream = new FileInputStream(
-            "src/test/resources/test.ics"
-        );
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = new FileInputStream(
+                "src/test/resources/test.ics"
+            );
+        } catch (FileNotFoundException e) {
+            Assert.fail("Test file not found");
+        }
 
         System.setIn(fileInputStream);
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(baos);
-
-        System.setOut(ps);
-
-        exit.expectSystemExitWithStatus(0);
+        this.exit.expectSystemExitWithStatus(0);
 
         Main.main(new String[]{
             "--query=.*",
@@ -148,16 +76,6 @@ public class MainTest {
             "--removeEvent"
         });
 
-        String result = baos.toString();
-
-        Matcher allDayMatcher = Pattern.compile(
-            "Osterferien 2017 Nordrhein-Westfalen"
-        ).matcher(result);
-
-        Assert.assertFalse(
-            "RemoveEvent wasn't processed",
-            allDayMatcher.find()
-        );
     }
 
 } 

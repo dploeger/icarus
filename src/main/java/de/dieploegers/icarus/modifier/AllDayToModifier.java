@@ -1,61 +1,62 @@
 package de.dieploegers.icarus.modifier;
 
+import de.dieploegers.icarus.ModifierOption;
+import de.dieploegers.icarus.OptionStore;
 import de.dieploegers.icarus.exceptions.ProcessException;
 import net.fortuna.ical4j.model.*;
+import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.TimeZone;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.DtEnd;
 import net.fortuna.ical4j.model.property.DtStart;
 import net.fortuna.ical4j.util.Dates;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Rework all day events to non-all day events
  */
 public class AllDayToModifier implements Modifier {
     @Override
-    public List<Option> getOptions() {
-        List<Option> options = new ArrayList<>();
+    public List<ModifierOption> getOptions() {
+        List<ModifierOption> options = new ArrayList<>();
         options.add(
-            Option.builder()
-                .longOpt("allDayTo")
-                .hasArg()
-                .desc("Change an all day event to this time range (hh:mm-hh:mm)")
-                .build()
+            new ModifierOption(
+                "allDayTo",
+                "Change an all day event to this time range (hh:mm-hh:mm)",
+                true
+            )
         );
 
         options.add(
-            Option.builder()
-                .longOpt("timezone")
-                .hasArg()
-                .desc("Timezone to use for the time. (e.g. Europe/Berlin)")
-                .build()
+            new ModifierOption(
+                "timezone",
+                "Timezone to use for the time. (e.g. Europe/Berlin)",
+                true
+            )
         );
         return options;
     }
 
     @Override
     public void process(
-        CommandLine commandLine, Calendar calendar, VEvent event
+        OptionStore options, Calendar calendar, VEvent event
     ) throws ProcessException {
         if (
-            commandLine.hasOption("allDayTo") &&
+            options.isSet("allDayTo") &&
                 event.getStartDate().toString().contains("VALUE=DATE:")
             ) {
 
             TimeZone timezone = null;
 
-            if (commandLine.hasOption("timezone")) {
+            if (options.isSet("timezone")) {
                 TimeZoneRegistry registry = TimeZoneRegistryFactory.getInstance().createRegistry();
                 timezone = registry.getTimeZone(
-                    commandLine.getOptionValue("timezone")
+                    options.get("timezone")
                 );
             }
 
-            String[] times = commandLine.getOptionValue(
+            String[] times = options.get(
                 "allDayTo"
             ).split("-");
 
@@ -65,6 +66,10 @@ public class AllDayToModifier implements Modifier {
             java.util.Calendar startCalendar = Dates.getCalendarInstance(
                 event.getStartDate().getDate()
             );
+
+            if (timezone != null) {
+                startCalendar.setTimeZone(timezone);
+            }
 
             if (event.getStartDate().getTimeZone() != null) {
                 startCalendar.setTimeZone(event.getStartDate().getTimeZone());
@@ -76,6 +81,10 @@ public class AllDayToModifier implements Modifier {
                 event.getStartDate().getDate()
             );
 
+            if (timezone != null) {
+                endCalendar.setTimeZone(timezone);
+            }
+
             endCalendar.setTime(event.getStartDate().getDate());
 
             if (event.getEndDate().getTimeZone() != null) {
@@ -83,7 +92,7 @@ public class AllDayToModifier implements Modifier {
             }
 
             startCalendar.set(
-                java.util.Calendar.HOUR,
+                java.util.Calendar.HOUR_OF_DAY,
                 Integer.valueOf(startTimeParts[0])
             );
             startCalendar.set(
@@ -92,7 +101,7 @@ public class AllDayToModifier implements Modifier {
             );
 
             endCalendar.set(
-                java.util.Calendar.HOUR,
+                java.util.Calendar.HOUR_OF_DAY,
                 Integer.valueOf(endTimeParts[0])
             );
 
@@ -128,8 +137,8 @@ public class AllDayToModifier implements Modifier {
 
     @Override
     public void finalize(
-        CommandLine commandLine, Calendar calendar, List<VEvent> matchedEvents
+        OptionStore options, Calendar calendar, List<VEvent> matchedEvents
     ) throws ProcessException {
-        // Nothing to do
+
     }
 }

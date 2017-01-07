@@ -18,8 +18,6 @@ Currently, the following processing features are available:
 * Convert all day events to date time events
 * Remove events
 
-The ICS file used in the test suite is taken from [schulferien.org](http://www.schulferien.org/deutschland/ical/). They do a great job regularly providing holidays and other events as ical files.
-
 ## Disclaimer
 
 icarus is currently beta software. It will not trash your ics files, but
