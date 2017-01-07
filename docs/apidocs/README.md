@@ -18,6 +18,8 @@ Currently, the following processing features are available:
 * Convert all day events to date time events
 * Remove events
 
+The ICS file used in the test suite is taken from [schulferien.org](http://www.schulferien.org/deutschland/ical/). They do a great job regularly providing holidays and other events as ical files.
+
 ## Disclaimer
 
 icarus is currently beta software. It will not trash your ics files, but
@@ -62,6 +64,15 @@ in the filtered range or with the filtered query.
 The resulting ICS data is written to stdout and can be piped to a new
 ICS file to be used in your favorite calendar app.
 
+## Using icarus as a library
+
+You can also use icarus as a library. Just instantiate a [Processor](https://dploeger.github.io/icarus/apidocs/de/dieploegers/icarus/Processor.html)
+and call "process" with an OptionStore and the source ical data and
+you'll get the processed data back.
+
+Refer to the [API-Docs](https://dploeger.github.io/icarus/apidocs/index.html)
+for more information.
+
 ## Extending icarus
 
 Currently, icarus does all the processing for which
@@ -74,19 +85,20 @@ and you're done.
 
 The interface is quite easy. The following methods have to be implemented:
 
-* getOptions: Provide a list of ModifierOptions, that indicate which
+* getOptions: Provide a list of [ModifierOptions](https://dploeger.github.io/icarus/apidocs/de/dieploegers/icarus/ModifierOption.html), that indicate which
   options your modifier expects
 * process: This is called for all events that match the filter. It is
-  called with the OptionStore holding all given options
+  called with the [OptionStore](https://dploeger.github.io/icarus/apidocs/de/dieploegers/icarus/OptionStore.html) holding all given options
   so you can check for your options, the current event and the
   complete calendar object for reference. Just directly modify the event.
   Do **not** modify the calendar object here, or else you're getting
   concurrent modification exceptions.
 * finalize: This is called after all events have been processed and this
   is the point where you can modify the complete calendar, if you'd
-  like to. You'll get the optionstore, the calendar and a list
+  like to. You'll get the OptionStore, the calendar and a list
   of events, that have been filtered before
 
-Use the existing modifiers as a reference.
+See the [API-Docs](https://dploeger.github.io/icarus/apidocs/index.html) for more information
+and use the existing modifiers as a reference.
 
 Go for it! I'm happy to accept pull requests for new features.
