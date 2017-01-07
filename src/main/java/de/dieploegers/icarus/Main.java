@@ -13,6 +13,7 @@ import org.reflections.Reflections;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -107,28 +108,26 @@ public class Main {
             System.exit(0);
         }
 
-        if (commandLine.getArgList().size() != 1) {
-            System.out.println("Please specify an ICS file");
-            usage(options);
-            System.exit(1);
-        }
+        InputStream stream = null;
+        if (commandLine.getArgList().size() == 0) {
+            stream = System.in;
+        } else {
+            String icalFilename = commandLine.getArgList().get(0);
 
-        String icalFilename = commandLine.getArgList().get(0);
-
-        FileInputStream fin = null;
-        try {
-            fin = new FileInputStream(icalFilename);
-        } catch (FileNotFoundException e) {
-            System.out.println("File not found");
-            usage(options);
-            System.exit(1);
+            try {
+                stream = new FileInputStream(icalFilename);
+            } catch (FileNotFoundException e) {
+                System.out.println("File not found");
+                usage(options);
+                System.exit(1);
+            }
         }
 
         CalendarBuilder builder = new CalendarBuilder();
 
         Calendar calendar = null;
         try {
-            calendar = builder.build(fin);
+            calendar = builder.build(stream);
         } catch (IOException e) {
             System.out.println("Error reading file.");
             usage(options);

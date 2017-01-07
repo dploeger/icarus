@@ -4,6 +4,7 @@ import org.junit.*;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.PrintStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -122,6 +123,41 @@ public class MainTest {
             allDayMatcher.find()
         );
 
+    }
+
+    @Test
+    public void testStdin() throws Exception {
+
+        FileInputStream fileInputStream = new FileInputStream(
+            "src/test/resources/test.ics"
+        );
+
+        System.setIn(fileInputStream);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(baos);
+
+        System.setOut(ps);
+
+        exit.expectSystemExitWithStatus(0);
+
+        Main.main(new String[]{
+            "--query=.*",
+            "--from=20170410000000",
+            "--until=20170423235959",
+            "--removeEvent"
+        });
+
+        String result = baos.toString();
+
+        Matcher allDayMatcher = Pattern.compile(
+            "Osterferien 2017 Nordrhein-Westfalen"
+        ).matcher(result);
+
+        Assert.assertFalse(
+            "RemoveEvent wasn't processed",
+            allDayMatcher.find()
+        );
     }
 
 } 

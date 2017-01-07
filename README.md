@@ -38,7 +38,9 @@ dependent libraries are packed into the JAR file.
 icarus is a command line application, that is called with
 arguments and the source ics file:
 
-    java -jar icarus.jar [options] icsfile.ics
+    java -jar icarus.jar [options] <icsfile.ics>
+
+If you omit the source file, it checks STDIN for ICS data.
 
 Use
 
