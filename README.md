@@ -5,10 +5,14 @@
 
 ## Introduction
 
-icarus does batch processing on iCal/ICS files. It's easy to use and
-extend.
+icarus does batch processing on [iCal/ICS](https://en.wikipedia.org/wiki/ICalendar)
+files. It's easy to use and extend.
 
-Currently, the following processors are available:
+It is written in Java 8, uses the wonderful [iCal4j library](http://ical4j.github.io/) for ICS
+file processing, the [reflection library](https://github.com/ronmamo/reflections)
+for easy extensibility and [Apache Commons CLI](http://commons.apache.org/proper/commons-cli/index.html) for CLI processing.
+
+Currently, the following processing features are available:
 
 * Add an alarm
 * Convert all day events to date time events
@@ -19,9 +23,15 @@ Currently, the following processors are available:
 icarus is currently beta software. It will not trash your ics files, but
  you might experience problems when importing the resulting ics data.
 
+## Download
+
+Check the [releases page](https://github.com/dploeger/icarus/releases)
+for a release and simply grab the attached JAR file.
+
 ## Requirements
 
-icarus is based on Java 8, so a corresponding JRE is needed.
+icarus is based on Java 8, so a corresponding JRE is needed. All
+dependent libraries are packed into the JAR file.
 
 ## Usage
 
@@ -49,3 +59,32 @@ in the filtered range or with the filtered query.
 
 The resulting ICS data is written to stdout and can be piped to a new
 ICS file to be used in your favorite calendar app.
+
+## Extending icarus
+
+Currently, icarus does all the processing for which
+[it was designed for](http://dennis.dieploegers.de/flying-high-on-ical-files/)
+
+However, it is designed to be open to new modifiers and if you'd like
+icarus to do something special with your ical events, you can just implement
+the [Modifier interface](https://github.com/dploeger/icarus/blob/master/src/main/java/de/dieploegers/icarus/modifier/Modifier.java)
+and you're done.
+
+The interface is quite easy. The following methods have to be implemented:
+
+* getOptions: Provide a list of [Apache commons CLI options](http://commons.apache.org/proper/commons-cli/properties.html)
+  that your modifier needs to be configured
+* process: This is called for all events that match the filter. It is
+  called with the [commandline object](http://commons.apache.org/proper/commons-cli/api-release/org/apache/commons/cli/CommandLine.html)
+  so you can check for your options, the current event and the
+  complete calendar object for reference. Just directly modify the event.
+  Do **not** modify the calendar object here, or else you're getting
+  concurrent modification exceptions.
+* finalize: This is called after all events have been processed and this
+  is the point where you can modify the complete calendar, if you'd
+  like to. You'll get the commandline object, the calendar and a list
+  of events, that have been filtered before
+
+Use the existing modifiers as a reference.
+
+Go for it! I'm happy to accept pull requests for new features.
