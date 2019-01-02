@@ -1,7 +1,5 @@
 package de.dieploegers.icarus;
 
-import de.dieploegers.icarus.modifier.Modifier;
-
 /**
  * A pojo describing options needed by a modifier
  */
@@ -39,7 +37,7 @@ public class ModifierOption {
      * @param hasValue Does the option require a value?
      */
 
-    public ModifierOption(String key, String description, boolean hasValue) {
+    public ModifierOption(final String key, final String description, final boolean hasValue) {
         this.key = key;
         this.description = description;
         this.hasValue = hasValue;
@@ -53,7 +51,7 @@ public class ModifierOption {
      * @param description Short description
      */
 
-    public ModifierOption(String key, String description) {
+    public ModifierOption(final String key, final String description) {
         this.key = key;
         this.description = description;
         this.hasValue = false;
@@ -65,7 +63,7 @@ public class ModifierOption {
      * @param key The key of the modifier
      */
 
-    public ModifierOption(String key) {
+    public ModifierOption(final String key) {
         this.key = key;
     }
 
@@ -73,7 +71,7 @@ public class ModifierOption {
         return key;
     }
 
-    public void setKey(String key) {
+    public void setKey(final String key) {
         this.key = key;
     }
 
@@ -81,7 +79,7 @@ public class ModifierOption {
         return hasValue;
     }
 
-    public void setHasValue(boolean hasValue) {
+    public void setHasValue(final boolean hasValue) {
         this.hasValue = hasValue;
     }
 
@@ -89,7 +87,7 @@ public class ModifierOption {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(final String value) {
         this.value = value;
     }
 
@@ -97,12 +95,12 @@ public class ModifierOption {
         return description;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 
-    static public ModifierOption withValue(String key, String value) {
-        ModifierOption option = new ModifierOption(key);
+    static public ModifierOption withValue(final String key, final String value) {
+        final ModifierOption option = new ModifierOption(key);
         option.setValue(value);
         return option;
     }

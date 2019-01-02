@@ -2,7 +2,6 @@ package de.dieploegers.icarus.modifier;
 
 import de.dieploegers.icarus.ModifierOption;
 import de.dieploegers.icarus.OptionStore;
-import de.dieploegers.icarus.exceptions.ProcessException;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.component.VEvent;
 
@@ -16,7 +15,7 @@ public class RemoveEventModifier implements Modifier {
 
     @Override
     public List<ModifierOption> getOptions() {
-        List<ModifierOption> options = new ArrayList<>();
+        final List<ModifierOption> options = new ArrayList<>();
         options.add(
             new ModifierOption(
                 "removeEvent",
@@ -28,15 +27,15 @@ public class RemoveEventModifier implements Modifier {
 
     @Override
     public void process(
-        OptionStore options, Calendar calendar, VEvent event
-    ) throws ProcessException {
+        final OptionStore options, final Calendar calendar, final VEvent event
+    ) {
 
     }
 
     @Override
     public void finalize(
-        OptionStore options, Calendar calendar, List<VEvent> matchedEvents
-    ) throws ProcessException {
+        final OptionStore options, final Calendar calendar, final List<VEvent> matchedEvents
+    ) {
         if (options.isSet("removeEvent")) {
             calendar.getComponents().removeAll(matchedEvents);
         }

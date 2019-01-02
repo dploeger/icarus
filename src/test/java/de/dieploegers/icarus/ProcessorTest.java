@@ -2,12 +2,14 @@ package de.dieploegers.icarus;
 
 import net.fortuna.ical4j.data.ParserException;
 import org.apache.commons.io.IOUtils;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.text.ParseException;
 import java.util.regex.Pattern;
 
@@ -20,31 +22,27 @@ public class ProcessorTest {
 
     @Before
     public void before() throws Exception {
-        InputStream stream = new FileInputStream(
+        final InputStream stream = new FileInputStream(
             "src/test/resources/test.ics"
         );
 
-        StringWriter writer = new StringWriter();
+        final StringWriter writer = new StringWriter();
         IOUtils.copy(stream, writer, "UTF-8");
         this.iCalData = writer.toString();
-    }
-
-    @After
-    public void after() throws Exception {
     }
 
     @Test()
     public void testAddAlarm() throws IllegalAccessException, InstantiationException, ClassNotFoundException, ParseException, ParserException, IOException {
 
-        OptionStore options = new OptionStore();
+        final OptionStore options = new OptionStore();
 
         options.addOption(
             ModifierOption.withValue("alarmBefore", "1")
         );
 
-        Processor processor = new Processor();
+        final Processor processor = new Processor();
 
-        String processed = processor.process(options, this.iCalData);
+        final String processed = processor.process(options, this.iCalData);
 
         Assert.assertTrue(
             "AddAlarm wasn't processed",
@@ -62,10 +60,39 @@ public class ProcessorTest {
 
     }
 
+    @Test()
+    public void testAddAlarmWithDuration() throws IllegalAccessException, InstantiationException, ClassNotFoundException, ParseException, ParserException, IOException {
+
+        final OptionStore options = new OptionStore();
+
+        options.addOption(
+            ModifierOption.withValue("alarmDuration", "-P1D")
+        );
+
+        final Processor processor = new Processor();
+
+        final String processed = processor.process(options, this.iCalData);
+
+        Assert.assertTrue(
+            "AddAlarm wasn't processed",
+            Pattern.compile(
+                "TRIGGER:-P1D"
+            ).matcher(processed).find()
+        );
+
+        Assert.assertTrue(
+            "Alarm message not found",
+            Pattern.compile(
+                "Alarm provided by icarus"
+            ).matcher(processed).find()
+        );
+
+    }
+
     @Test
     public void testAddAlarmMessage() throws IllegalAccessException, InstantiationException, ClassNotFoundException, ParseException, ParserException, IOException {
 
-        OptionStore options = new OptionStore();
+        final OptionStore options = new OptionStore();
 
         options.addOption(
             ModifierOption.withValue("alarmBefore", "1")
@@ -75,9 +102,9 @@ public class ProcessorTest {
             ModifierOption.withValue("alarmMessage", "TESTALARM")
         );
 
-        Processor processor = new Processor();
+        final Processor processor = new Processor();
 
-        String processed = processor.process(options, this.iCalData);
+        final String processed = processor.process(options, this.iCalData);
 
         Assert.assertTrue(
             "Alarm message not set",
@@ -91,7 +118,7 @@ public class ProcessorTest {
     @Test
     public void testAllDayTo() throws IllegalAccessException, InstantiationException, ClassNotFoundException, ParseException, ParserException, IOException {
 
-        OptionStore options = new OptionStore();
+        final OptionStore options = new OptionStore();
 
         options.addOption(
             ModifierOption.withValue("allDayTo", "19:00-19:05")
@@ -101,9 +128,9 @@ public class ProcessorTest {
             ModifierOption.withValue("timezone", "Europe/Berlin")
         );
 
-        Processor processor = new Processor();
+        final Processor processor = new Processor();
 
-        String processed = processor.process(options, this.iCalData);
+        final String processed = processor.process(options, this.iCalData);
 
         Assert.assertTrue(
             "AllDayTo wasn't processed",
@@ -117,7 +144,7 @@ public class ProcessorTest {
     @Test
     public void testRemoveEvent() throws IllegalAccessException, InstantiationException, ClassNotFoundException, ParseException, ParserException, IOException {
 
-        OptionStore options = new OptionStore();
+        final OptionStore options = new OptionStore();
 
         options.addOption(
             ModifierOption.withValue("from", "20170410000000")
@@ -131,9 +158,9 @@ public class ProcessorTest {
             new ModifierOption("removeEvent")
         );
 
-        Processor processor = new Processor();
+        final Processor processor = new Processor();
 
-        String processed = processor.process(options, this.iCalData);
+        final String processed = processor.process(options, this.iCalData);
 
         Assert.assertFalse(
             "RemoveEvent wasn't processed",
@@ -146,7 +173,7 @@ public class ProcessorTest {
 
     @Test
     public void testQuery() throws IllegalAccessException, InstantiationException, ClassNotFoundException, ParseException, ParserException, IOException {
-        OptionStore options = new OptionStore();
+        final OptionStore options = new OptionStore();
 
         options.addOption(
             ModifierOption.withValue(
@@ -159,9 +186,9 @@ public class ProcessorTest {
             new ModifierOption("removeEvent")
         );
 
-        Processor processor = new Processor();
+        final Processor processor = new Processor();
 
-        String processed = processor.process(options, this.iCalData);
+        final String processed = processor.process(options, this.iCalData);
 
         Assert.assertFalse(
             "RemoveEvent wasn't processed",

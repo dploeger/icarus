@@ -2,16 +2,19 @@ package de.dieploegers.icarus.modifier;
 
 import de.dieploegers.icarus.ModifierOption;
 import de.dieploegers.icarus.OptionStore;
-import de.dieploegers.icarus.exceptions.ProcessException;
-import net.fortuna.ical4j.model.*;
 import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.TimeZone;
+import net.fortuna.ical4j.model.TimeZoneRegistry;
+import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.DtEnd;
 import net.fortuna.ical4j.model.property.DtStart;
 import net.fortuna.ical4j.util.Dates;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Rework all day events to non-all day events
@@ -19,7 +22,7 @@ import java.util.*;
 public class AllDayToModifier implements Modifier {
     @Override
     public List<ModifierOption> getOptions() {
-        List<ModifierOption> options = new ArrayList<>();
+        final List<ModifierOption> options = new ArrayList<>();
         options.add(
             new ModifierOption(
                 "allDayTo",
@@ -40,30 +43,32 @@ public class AllDayToModifier implements Modifier {
 
     @Override
     public void process(
-        OptionStore options, Calendar calendar, VEvent event
-    ) throws ProcessException {
+        final OptionStore options, final Calendar calendar, final VEvent event
+    )
+    {
         if (
             options.isSet("allDayTo") &&
                 event.getStartDate().toString().contains("VALUE=DATE:")
-            ) {
+        )
+        {
 
             TimeZone timezone = null;
 
             if (options.isSet("timezone")) {
-                TimeZoneRegistry registry = TimeZoneRegistryFactory.getInstance().createRegistry();
+                final TimeZoneRegistry registry = TimeZoneRegistryFactory.getInstance().createRegistry();
                 timezone = registry.getTimeZone(
                     options.get("timezone")
                 );
             }
 
-            String[] times = options.get(
+            final String[] times = options.get(
                 "allDayTo"
             ).split("-");
 
-            String[] startTimeParts = times[0].split(":");
-            String[] endTimeParts = times[1].split(":");
+            final String[] startTimeParts = times[0].split(":");
+            final String[] endTimeParts = times[1].split(":");
 
-            java.util.Calendar startCalendar = Dates.getCalendarInstance(
+            final java.util.Calendar startCalendar = Dates.getCalendarInstance(
                 event.getStartDate().getDate()
             );
 
@@ -77,7 +82,7 @@ public class AllDayToModifier implements Modifier {
 
             startCalendar.setTime(event.getStartDate().getDate());
 
-            java.util.Calendar endCalendar = Dates.getCalendarInstance(
+            final java.util.Calendar endCalendar = Dates.getCalendarInstance(
                 event.getStartDate().getDate()
             );
 
@@ -110,23 +115,23 @@ public class AllDayToModifier implements Modifier {
                 Integer.valueOf(endTimeParts[1])
             );
 
-            DateTime startDateTime = new DateTime(startCalendar.getTime());
+            final DateTime startDateTime = new DateTime(startCalendar.getTime());
             if (timezone != null) {
                 startDateTime.setTimeZone(timezone);
             }
 
-            Property dtStartProperty = event.getProperty(Property.DTSTART);
+            final Property dtStartProperty = event.getProperty(Property.DTSTART);
             if (dtStartProperty != null) {
                 event.getProperties().remove(dtStartProperty);
                 event.getProperties().add(new DtStart(startDateTime));
             }
 
-            DateTime endDateTime = new DateTime(endCalendar.getTime());
+            final DateTime endDateTime = new DateTime(endCalendar.getTime());
             if (timezone != null) {
                 endDateTime.setTimeZone(timezone);
             }
 
-            Property dtEndProperty = event.getProperty(Property.DTEND);
+            final Property dtEndProperty = event.getProperty(Property.DTEND);
             if (dtEndProperty != null) {
                 event.getProperties().remove(dtEndProperty);
                 event.getProperties().add(new DtEnd(endDateTime));
@@ -137,8 +142,9 @@ public class AllDayToModifier implements Modifier {
 
     @Override
     public void finalize(
-        OptionStore options, Calendar calendar, List<VEvent> matchedEvents
-    ) throws ProcessException {
+        final OptionStore options, final Calendar calendar, final List<VEvent> matchedEvents
+    )
+    {
 
     }
 }

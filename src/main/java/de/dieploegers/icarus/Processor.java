@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
  */
 public class Processor {
 
-    private List<Modifier> modifiers;
+    private final List<Modifier> modifiers;
 
     /**
      * Creates the processor and scans available modifiers
@@ -39,12 +39,12 @@ public class Processor {
 
         this.modifiers = new ArrayList<>();
 
-        Reflections reflections = new Reflections(
+        final Reflections reflections = new Reflections(
             "de.dieploegers.icarus.modifier"
         );
 
         for (
-            Class<? extends Modifier> modifier :
+            final Class<? extends Modifier> modifier :
             reflections.getSubTypesOf(Modifier.class)
             ) {
             this.modifiers.add(
@@ -64,14 +64,14 @@ public class Processor {
      * @throws ParseException  Error parsing from or until date
      */
 
-    public String process(OptionStore options, String iCalData) throws
+    public String process(final OptionStore options, final String iCalData) throws
         IOException,
         ParserException, ParseException {
-        CalendarBuilder builder = new CalendarBuilder();
-        StringReader stringReader = new StringReader(iCalData);
-        Calendar calendar = builder.build(stringReader);
+        final CalendarBuilder builder = new CalendarBuilder();
+        final StringReader stringReader = new StringReader(iCalData);
+        final Calendar calendar = builder.build(stringReader);
 
-        Pattern queryPattern;
+        final Pattern queryPattern;
         if (options.isSet("query")) {
             queryPattern = Pattern.compile(
                 options.get("query")
@@ -96,11 +96,11 @@ public class Processor {
             );
         }
 
-        List<VEvent> matchedEvents = new ArrayList<>();
+        final List<VEvent> matchedEvents = new ArrayList<>();
 
-        for (CalendarComponent component : calendar.getComponents()) {
+        for (final CalendarComponent component : calendar.getComponents()) {
             if (component.getClass().getSimpleName().equals("VEvent")) {
-                VEvent event = (VEvent) component;
+                final VEvent event = (VEvent) component;
 
                 if (queryPattern.matcher(
                     event.getProperty(Property.SUMMARY).getValue()
@@ -133,14 +133,14 @@ public class Processor {
 
                         matchedEvents.add(event);
 
-                        for (Modifier modifier : this.modifiers) {
+                        for (final Modifier modifier : this.modifiers) {
                             try {
                                 modifier.process(
                                     options,
                                     calendar,
                                     event
                                 );
-                            } catch (ProcessException e) {
+                            } catch (final ProcessException e) {
                                 System.out.println(
                                     "Error modifying event: " + e.toString()
                                 );
@@ -154,14 +154,14 @@ public class Processor {
             }
         }
 
-        for (Modifier modifier : this.modifiers) {
+        for (final Modifier modifier : this.modifiers) {
             try {
                 modifier.finalize(
                     options,
                     calendar,
                     matchedEvents
                 );
-            } catch (ProcessException e) {
+            } catch (final ProcessException e) {
                 System.out.println(
                     "Error finalizing events: " + e.toString()
                 );

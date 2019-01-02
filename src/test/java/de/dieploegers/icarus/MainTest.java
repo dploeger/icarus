@@ -1,15 +1,12 @@
 package de.dieploegers.icarus;
 
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.PrintStream;
-import java.security.Permission;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Main Tester.
@@ -18,14 +15,6 @@ public class MainTest {
 
     @Rule
     public final ExpectedSystemExit exit = ExpectedSystemExit.none();
-
-    @Before
-    public void before() throws Exception {
-    }
-
-    @After
-    public void after() throws Exception {
-    }
 
     @Test()
     public void testCall() {
@@ -61,7 +50,7 @@ public class MainTest {
             fileInputStream = new FileInputStream(
                 "src/test/resources/test.ics"
             );
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             Assert.fail("Test file not found");
         }
 

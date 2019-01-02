@@ -7,11 +7,11 @@ import java.util.List;
  * A small utility class handling options
  */
 public class OptionStore {
-    private HashMap<String, ModifierOption> options;
+    private final HashMap<String, ModifierOption> options;
 
-    public OptionStore(List<ModifierOption> options) {
+    public OptionStore(final List<ModifierOption> options) {
         this.options = new HashMap<>();
-        for (ModifierOption option : options) {
+        for (final ModifierOption option : options) {
             this.options.put(option.getKey(), option);
         }
     }
@@ -27,7 +27,7 @@ public class OptionStore {
      * @return true, if the option has been set
      */
 
-    public boolean isSet(String key) {
+    public boolean isSet(final String key) {
         return this.options.containsKey(key);
     }
 
@@ -37,7 +37,7 @@ public class OptionStore {
      * @param option Option to add
      */
 
-    public void addOption(ModifierOption option) {
+    public void addOption(final ModifierOption option) {
         this.options.put(option.getKey(), option);
     }
 
@@ -48,7 +48,7 @@ public class OptionStore {
      * @return The value of the option
      */
 
-    public String get(String key) {
+    public String get(final String key) {
         return this.options.get(key).getValue();
     }
 }

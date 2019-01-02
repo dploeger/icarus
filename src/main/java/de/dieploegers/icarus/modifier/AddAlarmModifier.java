@@ -2,7 +2,6 @@ package de.dieploegers.icarus.modifier;
 
 import de.dieploegers.icarus.ModifierOption;
 import de.dieploegers.icarus.OptionStore;
-import de.dieploegers.icarus.exceptions.ProcessException;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Dur;
 import net.fortuna.ical4j.model.component.VAlarm;
@@ -19,11 +18,18 @@ import java.util.List;
 public class AddAlarmModifier implements Modifier {
     @Override
     public List<ModifierOption> getOptions() {
-        List<ModifierOption> options = new ArrayList<>();
+        final List<ModifierOption> options = new ArrayList<>();
         options.add(
             new ModifierOption(
                 "alarmBefore",
                 "Add an alarm before all appointments (hours)",
+                true
+            )
+        );
+        options.add(
+            new ModifierOption(
+                "alarmDuration",
+                "The concrete duration string used in ics for the alarm (see https://www.kanzaki.com/docs/ical/duration-t.html)",
                 true
             )
         );
@@ -39,21 +45,30 @@ public class AddAlarmModifier implements Modifier {
 
     @Override
     public void process(
-        OptionStore options, Calendar calendar, VEvent event
-    ) {
-        if (options.isSet("alarmBefore")) {
-            VAlarm alarm = new VAlarm(
-                new Dur(
-                    0,
-                    Integer.valueOf(
-                        options.get(
-                            "alarmBefore"
-                        )
-                    ) * -1,
-                    0,
-                    0
-                )
-            );
+        final OptionStore options, final Calendar calendar, final VEvent event
+    )
+    {
+        if (options.isSet("alarmBefore") || options.isSet("alarmDuration")) {
+            final VAlarm alarm;
+
+            if (options.isSet("alarmBefore")) {
+                alarm = new VAlarm(
+                    new Dur(
+                        0,
+                        Integer.valueOf(
+                            options.get(
+                                "alarmBefore"
+                            )
+                        ) * -1,
+                        0,
+                        0
+                    )
+                );
+            } else {
+                alarm = new VAlarm(
+                    new Dur(options.get("alarmDuration"))
+                );
+            }
 
             alarm.getProperties().add(Action.DISPLAY);
             if (options.isSet("alarmMessage")) {
@@ -70,12 +85,13 @@ public class AddAlarmModifier implements Modifier {
                 alarm
             );
         }
+
     }
 
     @Override
-    public void finalize(
-        OptionStore options, Calendar calendar, List<VEvent> matchedEvents
-    ) throws ProcessException {
+    public void finalize(final OptionStore options, final Calendar calendar, final List<VEvent> matchedEvents)
+    {
 
     }
+
 }
