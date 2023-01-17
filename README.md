@@ -1,107 +1,157 @@
-# icarus - iCal batch processor
-[![Travis](https://img.shields.io/travis/dploeger/icarus.svg)](https://travis-ci.org/dploeger/icarus)
+![](logo.png "icarus Logo")
 
-![icarus](design/logo.png)
+# icarus
+
+iCal file processor
 
 ## Introduction
 
-icarus does batch processing on [iCal/ICS](https://en.wikipedia.org/wiki/ICalendar)
-files. It's easy to use and extend.
+icarus is a command line utility that processes iCal files
+as defined in [RFC5545](https://www.rfc-editor.org/rfc/rfc5545).
 
-It is written in Java 8, uses the wonderful [iCal4j library](http://ical4j.github.io/) for ICS
-file processing, the [reflection library](https://github.com/ronmamo/reflections)
-for easy extensibility and [Apache Commons CLI](http://commons.apache.org/proper/commons-cli/index.html) for CLI processing.
+It utilizes the common unix philosophy of commands doing
+one specific thing with one output piped to another command.
 
-Currently, the following processing features are available:
+> Version 1 was developed in Java while icarus now is developed
+> in Golang.
 
-* Add an alarm
-* Convert all day events to date time events
-* Remove events
-
-The ICS file used in the test suite is taken from [schulferien.org](http://www.schulferien.org/deutschland/ical/). They do a great job regularly providing holidays and other events as ical files.
-
-## Disclaimer
-
-icarus is currently beta software. It will not trash your ics files, but
- you might experience problems when importing the resulting ics data.
-
-## Download
-
-Check the [releases page](https://github.com/dploeger/icarus/releases)
-for a release and simply grab the attached JAR file.
-
-## Requirements
-
-icarus is based on Java 8, so a corresponding JRE is needed. All
-dependent libraries are packed into the JAR file.
+The packages that make up icarus can also be used in form
+of a Golang package.
 
 ## Usage
 
-icarus is a command line application, that is called with
-arguments and the source ics file:
+Download the last stable release of icarus for the platform
+and architecture of your choice and then run the `icarus` command 
+following the  processor subcommand and relevant arguments.
 
-    java -jar icarus.jar [options] <icsfile.ics>
+Use `icarus --help` for the available subcommands and
+arguments. Use `icarus <subcommand> --help` for more
+information about the specific subcommand.
 
-If you omit the source file, it checks STDIN for ICS data.
+## Selectors
 
-Use
+icarus supports selecting events from the incoming data
+to be processed by the selected processor.
 
-    java -jar icarus.jar --help
+By default, all events are selected. The following selectors
+are available:
 
-to get detailed help.
+* text selector: the `--selector` argument can be used
+  to select events based on a regular expression.
+  By default, the properties "summary" and "description"
+  are searched for the pattern. This can be changed
+  using the `--selector-props` list
+* time selector: the `--timestamp-start` and
+  `--timestamp-end` arguments can be used to select 
+  events starting after and ending before the given
+  timestamp respectively. The timestamp needs to be
+  RFC3339-formatted
 
-Basically, icarus expects a query and/or a time range to search
-events.
+## Outputs
 
-The query is a regular expression that is matched against the title of
-the appointment. The arguments "from" and "until" describe a time range,
-that the event has to be in.
+icarus outputs the data in iCal format by default, you
+can use the `--output-type` argument to specify another
+output type.
 
-The desired processor is configured using the corresponding
-argument. For example, the argument "--removeEvent" will remove all events
-in the filtered range or with the filtered query.
+Currently, `list` is another output type that can be used
+to show calendar entries in a list.
 
-The resulting ICS data is written to stdout and can be piped to a new
-ICS file to be used in your favorite calendar app.
+## Processors
 
-## Using icarus as a library
+The following processors are currently available:
 
-You can also use icarus as a library. Just instantiate a [Processor](https://dploeger.github.io/icarus/apidocs/de/dieploegers/icarus/Processor.html)
-and call "process" with an OptionStore and the source ical data and
-you'll get the processed data back.
+### `addAlarm`
 
-Refer to the [API-Docs](https://dploeger.github.io/icarus/apidocs/index.html)
-for more information.
+Adds an alarm before the selected events. The
+argument `--alarm-before` specifies how many minutes
+the alarm should be before the start of the event.
 
-You can use the icarus.lib.jar for library use. I will be
-providing icarus over Maven some time later.
+### `addDTStamp`
 
-## Extending icarus
+Adds a DTSTAMP property as specified by the `--timestamp`
+argument. If an event already has a DTSTAMP property, it may
+be overwritten by using the `--overwrite` argument.
 
-Currently, icarus does all the processing for which
-[it was designed for](http://dennis.dieploegers.de/flying-high-on-ical-files/)
+### `convertAllDay`
 
-However, it is designed to be open to new modifiers and if you'd like
-icarus to do something special with your ical events, you can just implement
-the [Modifier interface](https://github.com/dploeger/icarus/blob/master/src/main/java/de/dieploegers/icarus/modifier/Modifier.java)
-and you're done.
+Convert all day events into events with a start and end time
+("timed events") or vice versa if the `--all-day` flag is used.
 
-The interface is quite easy. The following methods have to be implemented:
+Start and end times have to be specified in a colon-separated,
+24 hour format (like 13:00) in the arguments `--start` and
+`--end` respectively.
 
-* getOptions: Provide a list of [ModifierOptions](https://dploeger.github.io/icarus/apidocs/de/dieploegers/icarus/ModifierOption.html), that indicate which
-  options your modifier expects
-* process: This is called for all events that match the filter. It is
-  called with the [OptionStore](https://dploeger.github.io/icarus/apidocs/de/dieploegers/icarus/OptionStore.html) holding all given options
-  so you can check for your options, the current event and the
-  complete calendar object for reference. Just directly modify the event.
-  Do **not** modify the calendar object here, or else you're getting
-  concurrent modification exceptions.
-* finalize: This is called after all events have been processed and this
-  is the point where you can modify the complete calendar, if you'd
-  like to. You'll get the OptionStore, the calendar and a list
-  of events, that have been filtered before
+If all day events span multiple dates, the `--compress` argument
+can be used to make them only span the start date.
 
-See the [API-Docs](https://dploeger.github.io/icarus/apidocs/index.html) for more information
-and use the existing modifiers as a reference.
+If UTC is not the expected timezone, the [IANA timezone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) 
+name can be set using the `--timezone` argument.
 
-Go for it! I'm happy to accept pull requests for new features.
+### `filter`
+
+Only output the events matching the selector or, if the
+`--inverse` flag is used, events *not* matching the selector.
+
+### `print`
+
+Output *all* events from the source calendar. The selectors are
+ignored for this subcommand. Can be used to make use of icarus'
+output types.
+
+## Contributing
+
+We're happy to accept contributions to icarus. Please make sure
+to use the issue tracker first before you send pull requests
+to make sure the task can not be done with the current set of
+options.
+
+Since version 2 icarus is developed in [Golang](https://go.dev/).
+
+Please make sure to supply sufficient unit tests to the changes
+you submit. Always branch from the develop branch.
+
+### Creating new processors
+
+A processor has to ímplement the interface [*BaseProcessor*](pkg/processors/processors.go).
+
+`Initialize` is used to create a new [argparse Command type](https://pkg.go.dev/github.com/akamensky/argparse#Command)
+that runs the processor. Use *uppercase short arguments* to distinguish
+them from other processors and the main and output arguments.
+
+`SetToolbox` is called to set the [toolbox](pkg/processors/toolbox.go)
+variable for the processor. The toolbox contains several useful
+tools for developing a processor - most importantly the
+`EventMatchesSelector` function that needs to be called for
+every event so that the selector arguments are properly used.
+
+Finally, `Process` is called with the incoming events and a reference
+to the output events, both in form of a [Calendar type](https://pkg.go.dev/github.com/arran4/golang-ical#Calendar)
+from the [golang-ical](https://pkg.go.dev/github.com/arran4/golang-ical) package.
+
+To activate a processor, add it to the `GetProcessors` function in
+[processors.go](pkg/processors/processors.go).
+
+Be sure to create sufficient unit tests in a _test file and add a
+documentation to this readme.
+
+### Creating new output types
+
+Output types implement the [*BaseOutputType* interface](pkg/outputTypes/output_types.go).
+
+`Initialize` is used to add arguments to the main icarus argument parser.
+See the [argparse package](https://pkg.go.dev/github.com/akamensky/argparse) for details.
+
+Use *lowercase short arguments* to differentiate them from processor arguments, but
+make sure they don't clash with the arguments of other output types or
+main arguments.
+
+`Generate` is provided with the processed calendar entries in form of
+a [Calendar type](https://pkg.go.dev/github.com/arran4/golang-ical#Calendar) and an
+[io.Writer](https://pkg.go.dev/io#Writer) variable to which the output should be written to.
+
+`GetHelp` returns a short string about the function of the output.
+
+Add the new output type to the return value of the `GetOutputTypes` function in 
+[output_types.go](pkg/outputTypes/output_types.go)
+
+Finally, provide sufficient unit tests in a _test file and update the documentation.
