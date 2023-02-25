@@ -22,5 +22,7 @@ func GetProcessors() []BaseProcessor {
 		&ConvertAllDayProcessor{},
 		&AddDTStampProcessor{},
 		&AddAlarmProcessor{},
+		&AddPropertyProcessor{},
+		&DeletePropertyProcessor{},
 	}
 }
