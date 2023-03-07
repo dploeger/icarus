@@ -19,7 +19,7 @@ func (t *ListOutputType) Initialize(parser *argparse.Parser) error {
 }
 
 func (t *ListOutputType) Generate(calendar *ical.Calendar, writer io.Writer) error {
-	if t.columns == nil {
+	if t.columns == nil || len(*t.columns) == 0 {
 		t.columns = &[]string{"SUMMARY", "DTSTART", "DTEND", "DESCRIPTION"}
 	}
 	table := tablewriter.NewWriter(writer)
