@@ -1,10 +1,10 @@
 package processors
 
 import (
+	"github.com/dploeger/icarus/internal"
 	"github.com/emersion/go-ical"
 	"github.com/stretchr/testify/assert"
 	_ "github.com/stretchr/testify/assert"
-	"icarus/internal"
 	"regexp"
 	"testing"
 )

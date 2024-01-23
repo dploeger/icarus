@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// The AddDTStampProcessor adds a DTSTAMP field to all selected events
 type AddDTStampProcessor struct {
 	timestamp *string
 	overwrite *bool
@@ -49,3 +50,5 @@ func (t *AddDTStampProcessor) Process(input ical.Calendar, output *ical.Calendar
 	}
 	return nil
 }
+
+var _ BaseProcessor = &AddDTStampProcessor{}

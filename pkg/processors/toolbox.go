@@ -1,7 +1,5 @@
 package processors
 
-// a toolbox of common functions
-
 import (
 	"github.com/emersion/go-ical"
 	"github.com/sirupsen/logrus"
@@ -9,6 +7,7 @@ import (
 	"time"
 )
 
+// A Toolbox of common functions
 type Toolbox struct {
 	// TextSelectorPattern is the user specified regexp pattern to select events by
 	TextSelectorPattern *regexp.Regexp

@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// The AddPropertyProcessor adds an ICS property to each selected event
 type AddPropertyProcessor struct {
 	propertyName  *string
 	propertyValue *string
@@ -50,3 +51,5 @@ func (a *AddPropertyProcessor) Process(input ical.Calendar, output *ical.Calenda
 	}
 	return nil
 }
+
+var _ BaseProcessor = &AddPropertyProcessor{}
