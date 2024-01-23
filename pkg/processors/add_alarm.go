@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// The AddAlarmProcessor adds an alarm definition to all selected events
 type AddAlarmProcessor struct {
 	alarmBefore *int
 	toolbox     Toolbox
@@ -38,3 +39,5 @@ func (a *AddAlarmProcessor) Process(input ical.Calendar, output *ical.Calendar) 
 	}
 	return nil
 }
+
+var _ BaseProcessor = &AddAlarmProcessor{}

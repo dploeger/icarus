@@ -1,3 +1,5 @@
+// Package outputTypes includes all valid output types that Icarus supports.
+// outputtypes use the internal processed calendar structure and format it for the output.
 package outputTypes
 
 import (
@@ -9,6 +11,7 @@ import (
 	"strings"
 )
 
+// The BaseOutputType is the basic interface for all output types
 type BaseOutputType interface {
 	// Initialize can add arguments to the argument parser.
 	Initialize(parser *argparse.Parser) error
