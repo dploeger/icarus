@@ -1,7 +1,7 @@
 package processors
 
 import (
-	"github.com/dploeger/icarus/internal"
+	"github.com/dploeger/icarus/v2/internal"
 	"github.com/emersion/go-ical"
 	"github.com/stretchr/testify/assert"
 	"regexp"

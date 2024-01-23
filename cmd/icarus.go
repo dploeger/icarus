@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/akamensky/argparse"
-	"github.com/dploeger/icarus/pkg/outputTypes"
-	"github.com/dploeger/icarus/pkg/processors"
+	"github.com/dploeger/icarus/v2/pkg/outputTypes"
+	"github.com/dploeger/icarus/v2/pkg/processors"
 	"github.com/emersion/go-ical"
 	"github.com/sirupsen/logrus"
 	"github.com/thoas/go-funk"
