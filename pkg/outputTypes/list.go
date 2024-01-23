@@ -7,6 +7,7 @@ import (
 	"io"
 )
 
+// The ListOutputType converts the internal calendar into a table format
 type ListOutputType struct {
 	columns *[]string
 }
@@ -43,3 +44,5 @@ func (t *ListOutputType) Generate(calendar *ical.Calendar, writer io.Writer) err
 func (t *ListOutputType) GetHelp() string {
 	return "outputs a list of events from the processed calendar"
 }
+
+var _ BaseOutputType = &ListOutputType{}

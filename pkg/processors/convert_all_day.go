@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+// The ConvertAllDayProcessor converts all-day events to timed events or vice versa
 type ConvertAllDayProcessor struct {
 	toolbox      Toolbox
 	targetAllDay *bool
@@ -156,3 +157,5 @@ func (c *ConvertAllDayProcessor) getStartAndEndDuration() (time.Duration, time.D
 	}
 	return startDuration, endDuration, nil
 }
+
+var _ BaseProcessor = &ConvertAllDayProcessor{}
