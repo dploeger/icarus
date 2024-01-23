@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// The DeletePropertyProcessor deletes an ICS property from all selected events
 type DeletePropertyProcessor struct {
 	propertyName *string
 	toolbox      Toolbox
@@ -35,3 +36,5 @@ func (d *DeletePropertyProcessor) Process(input ical.Calendar, output *ical.Cale
 	}
 	return nil
 }
+
+var _ BaseProcessor = &DeletePropertyProcessor{}

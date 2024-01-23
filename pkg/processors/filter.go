@@ -5,6 +5,7 @@ import (
 	"github.com/emersion/go-ical"
 )
 
+// The FilterProcessor filters the calendar for selected events
 type FilterProcessor struct {
 	toolbox Toolbox
 	inverse *bool
@@ -33,3 +34,5 @@ func (f *FilterProcessor) Process(inputCalendar ical.Calendar, outputCalendar *i
 func (f *FilterProcessor) SetToolbox(toolbox Toolbox) {
 	f.toolbox = toolbox
 }
+
+var _ BaseProcessor = &FilterProcessor{}

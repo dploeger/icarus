@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 	"github.com/akamensky/argparse"
+	"github.com/dploeger/icarus/pkg/outputTypes"
+	"github.com/dploeger/icarus/pkg/processors"
 	"github.com/emersion/go-ical"
 	"github.com/sirupsen/logrus"
 	"github.com/thoas/go-funk"
-	"icarus/pkg/outputTypes"
-	"icarus/pkg/processors"
 	"os"
 	"regexp"
 	"time"

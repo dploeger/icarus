@@ -6,6 +6,7 @@ import (
 	"io"
 )
 
+// The ICSOutputType converts the internal calendar into the standardizes ICS format
 type ICSOutputType struct{}
 
 func (t *ICSOutputType) Initialize(_ *argparse.Parser) error {
@@ -23,3 +24,5 @@ func (t *ICSOutputType) Generate(calendar *ical.Calendar, writer io.Writer) erro
 func (t *ICSOutputType) GetHelp() string {
 	return "outputs an ICS file from the processed calendar"
 }
+
+var _ BaseOutputType = &ICSOutputType{}
