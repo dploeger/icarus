@@ -1,4 +1,4 @@
-package internal
+package test
 
 // BoolAddr creates a pointer to a bool value
 func BoolAddr(b bool) *bool {

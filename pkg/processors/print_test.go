@@ -21,8 +21,9 @@ func TestPrintProcessor_Process(t *testing.T) {
 	input.Children = append(input.Children, event1.Component, event2.Component)
 	output := ical.NewCalendar()
 	err := subject.Process(*input, output)
-	assert.NoError(t, err, "Process yielded error")
-	assert.Len(t, output.Children, 2, "Output calendar was filtered")
-	assert.Equal(t, "test", output.Children[0].Props.Get(ical.PropSummary).Value, "Output calendar had the wrong event")
-	assert.Equal(t, "not", output.Children[1].Props.Get(ical.PropSummary).Value, "Output calendar had the wrong event")
+	if assert.NoError(t, err, "Process yielded error") {
+		assert.Len(t, output.Children, 2, "Output calendar was filtered")
+		assert.Equal(t, "test", output.Children[0].Props.Get(ical.PropSummary).Value, "Output calendar had the wrong event")
+		assert.Equal(t, "not", output.Children[1].Props.Get(ical.PropSummary).Value, "Output calendar had the wrong event")
+	}
 }

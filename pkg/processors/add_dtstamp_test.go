@@ -1,7 +1,6 @@
 package processors
 
 import (
-	"github.com/dploeger/icarus/v2/internal"
 	"github.com/emersion/go-ical"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -18,13 +17,14 @@ func TestAddDTStampProcessor_Process(t *testing.T) {
 	input.Children = append(input.Children, event1.Component)
 	subject := AddDTStampProcessor{}
 	subject.SetToolbox(NewToolbox())
-	subject.timestamp = internal.StringAddr(now.Format("20060102T150405Z"))
+	subject.Timestamp = now
 	output := ical.NewCalendar()
 	err := subject.Process(*input, output)
-	assert.NoError(t, err, "Process got an error")
-	assert.Len(t, output.Children, 1, "Invalid number of events")
-	dtstamptime, _ := output.Children[0].Props.Get(ical.PropDateTimeStamp).DateTime(time.UTC)
-	assert.Equal(t, now, dtstamptime)
+	if assert.NoError(t, err, "Process got an error") {
+		assert.Len(t, output.Children, 1, "Invalid number of events")
+		dtstamptime, _ := output.Children[0].Props.Get(ical.PropDateTimeStamp).DateTime(time.UTC)
+		assert.Equal(t, now, dtstamptime)
+	}
 }
 
 func TestAddDTStampProcessor_ProcessNoOverwrite(t *testing.T) {
@@ -37,16 +37,17 @@ func TestAddDTStampProcessor_ProcessNoOverwrite(t *testing.T) {
 	input := ical.NewCalendar()
 	input.Children = append(input.Children, event1.Component)
 	subject := AddDTStampProcessor{}
-	subject.overwrite = internal.BoolAddr(false)
+	subject.Overwrite = false
 	subject.SetToolbox(NewToolbox())
 	modifiedTime := now.Add(-1 * time.Hour)
-	subject.timestamp = internal.StringAddr(modifiedTime.Format("20060102T150405Z"))
+	subject.Timestamp = modifiedTime
 	output := ical.NewCalendar()
 	err := subject.Process(*input, output)
-	assert.NoError(t, err, "Process got an error")
-	assert.Len(t, output.Children, 1, "Invalid number of events")
-	dtstamptime, _ := output.Children[0].Props.Get(ical.PropDateTimeStamp).DateTime(time.UTC)
-	assert.Equal(t, now, dtstamptime)
+	if assert.NoError(t, err, "Process got an error") {
+		assert.Len(t, output.Children, 1, "Invalid number of events")
+		dtstamptime, _ := output.Children[0].Props.Get(ical.PropDateTimeStamp).DateTime(time.UTC)
+		assert.Equal(t, now, dtstamptime)
+	}
 }
 
 func TestAddDTStampProcessor_ProcessOverwrite(t *testing.T) {
@@ -59,14 +60,15 @@ func TestAddDTStampProcessor_ProcessOverwrite(t *testing.T) {
 	input := ical.NewCalendar()
 	input.Children = append(input.Children, event1.Component)
 	subject := AddDTStampProcessor{}
-	subject.overwrite = internal.BoolAddr(true)
+	subject.Overwrite = true
 	subject.SetToolbox(NewToolbox())
 	modifiedTime := now.Add(-1 * time.Hour)
-	subject.timestamp = internal.StringAddr(modifiedTime.Format("20060102T150405Z"))
+	subject.Timestamp = modifiedTime
 	output := ical.NewCalendar()
 	err := subject.Process(*input, output)
-	assert.NoError(t, err, "Process got an error")
-	assert.Len(t, output.Children, 1, "Invalid number of events")
-	dtstamptime, _ := output.Children[0].Props.Get(ical.PropDateTimeStamp).DateTime(time.UTC)
-	assert.Equal(t, modifiedTime, dtstamptime)
+	if assert.NoError(t, err, "Process got an error") {
+		assert.Len(t, output.Children, 1, "Invalid number of events")
+		dtstamptime, _ := output.Children[0].Props.Get(ical.PropDateTimeStamp).DateTime(time.UTC)
+		assert.Equal(t, modifiedTime, dtstamptime)
+	}
 }
