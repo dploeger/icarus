@@ -22,6 +22,7 @@ jobs:
     env:
       GOOS: ${{ matrix.goos }}
       GOARCH: ${{ matrix.goarch }}
+      EXT: ""
 
     steps:
       - uses: actions/checkout@v3
@@ -34,11 +35,16 @@ jobs:
       - name: Build
         run: go build -o icarus cmd/icarus.go
 
+      - name: Setup ext on Windows
+        run: |
+          echo "EXT=.exe" >> $GITHUB_ENV
+        if: ${{ matrix.goos == "windows" }}
+
       - name: Release file
         uses: djnicholson/release-action@v2.10
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-name: ${{ github.event.release.name }}
           tag-name: ${{ github.event.release.tag_name }}
-          asset-name: icarus-${{ matrix.goos }}-${{ matrix.goarch }}
+          asset-name: icarus-${{ matrix.goos }}-${{ matrix.goarch }}${{ env.EXT }}
           file: icarus
