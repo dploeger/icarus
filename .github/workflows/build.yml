@@ -38,7 +38,7 @@ jobs:
       - name: Setup ext on Windows
         run: |
           echo "EXT=.exe" >> $GITHUB_ENV
-        if: ${{ matrix.goos == "windows" }}
+        if: ${{ matrix.goos == 'windows' }}
 
       - name: Release file
         uses: djnicholson/release-action@v2.10
