@@ -14,7 +14,7 @@ func (t *ICSOutputType) Initialize(_ *argparse.Parser) error {
 	return nil
 }
 
-func (t *ICSOutputType) Generate(calendar *ical.Calendar, writer io.Writer) error {
+func (t *ICSOutputType) Generate(calendar *ical.Calendar, writer io.Writer, _ OutputOptions) error {
 	if err := ical.NewEncoder(writer).Encode(calendar); err != nil {
 		return err
 	}

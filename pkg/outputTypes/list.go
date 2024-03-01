@@ -9,25 +9,18 @@ import (
 
 // The ListOutputType converts the internal calendar into a table format
 type ListOutputType struct {
-	columns *[]string
 }
 
-func (t *ListOutputType) Initialize(parser *argparse.Parser) error {
-	t.columns = parser.StringList("c", "columns", &argparse.Options{
-		Help: "Columns to display",
-	})
+func (t *ListOutputType) Initialize(_ *argparse.Parser) error {
 	return nil
 }
 
-func (t *ListOutputType) Generate(calendar *ical.Calendar, writer io.Writer) error {
-	if t.columns == nil || len(*t.columns) == 0 {
-		t.columns = &[]string{"SUMMARY", "DTSTART", "DTEND", "DESCRIPTION"}
-	}
+func (t *ListOutputType) Generate(calendar *ical.Calendar, writer io.Writer, options OutputOptions) error {
 	table := tablewriter.NewWriter(writer)
-	table.SetHeader(*t.columns)
+	table.SetHeader(options.Columns)
 	for _, event := range calendar.Events() {
 		var row []string
-		for _, column := range *t.columns {
+		for _, column := range options.Columns {
 			if event.Props.Get(column) == nil {
 				row = append(row, "")
 			} else {

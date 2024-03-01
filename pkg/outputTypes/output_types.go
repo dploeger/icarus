@@ -11,12 +11,17 @@ import (
 	"strings"
 )
 
+// OutputOptions hold basic options for all output types
+type OutputOptions struct {
+	Columns []string
+}
+
 // The BaseOutputType is the basic interface for all output types
 type BaseOutputType interface {
 	// Initialize can add arguments to the argument parser.
 	Initialize(parser *argparse.Parser) error
 	// Generate generates the output based on the given calendar and writes it to writer
-	Generate(calendar *ical.Calendar, writer io.Writer) error
+	Generate(calendar *ical.Calendar, writer io.Writer, options OutputOptions) error
 	// GetHelp returns a help string about what the output produces
 	GetHelp() string
 }
@@ -26,6 +31,7 @@ func GetOutputTypes() map[string]BaseOutputType {
 	m := make(map[string]BaseOutputType)
 	m["ics"] = &ICSOutputType{}
 	m["list"] = &ListOutputType{}
+	m["csv"] = &CSVOutputType{}
 	return m
 }
 
