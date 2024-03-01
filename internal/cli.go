@@ -60,6 +60,10 @@ func Main() int {
 		Help:    fmt.Sprintf("Type of output. Valid types:\n%s\n\t\t\t", outputTypes.GetOutputHelp()),
 		Default: "ics",
 	})
+	columns := parser.StringList("c", "columns", &argparse.Options{
+		Help:    "Columns to output (used by list and csv outputs)",
+		Default: []string{"SUMMARY", "DTSTART", "DTEND", "DESCRIPTION"},
+	})
 	logLevel := parser.String("l", "loglevel", &argparse.Options{
 		Help:    "Loglevel to use",
 		Default: "error",
@@ -149,7 +153,9 @@ func Main() int {
 
 	logrus.Infof("Generating output type %s", *outputType)
 
-	if err := availableOutputTypes[*outputType].Generate(outputCalendar, outputFile); err != nil {
+	if err := availableOutputTypes[*outputType].Generate(outputCalendar, outputFile, outputTypes.OutputOptions{
+		Columns: *columns,
+	}); err != nil {
 		fmt.Print(parser.Usage(err))
 		return 4
 	}
