@@ -31,6 +31,7 @@ func GetOutputTypes() map[string]BaseOutputType {
 	m := make(map[string]BaseOutputType)
 	m["ics"] = &ICSOutputType{}
 	m["list"] = &ListOutputType{}
+	m["table"] = &TableOutputType{}
 	m["csv"] = &CSVOutputType{}
 	return m
 }
