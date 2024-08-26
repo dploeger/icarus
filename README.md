@@ -54,8 +54,26 @@ icarus outputs the data in iCal format by default, you
 can use the `--output-type` argument to specify another
 output type.
 
-Currently, `list` is the other output type that can be used
-to show calendar entries in a list.
+Available output types are:
+
+### `csv`
+
+Outputs all events as rows in a CSV file. The iCal field names are used
+for the CSV headers. You can select the separator using the `--separator`
+parameter.
+
+### `list` (deprecated)
+
+Outputs all events formatted as a table.
+
+This output is currently deprecated as the name is misleading. In the upcoming
+major version we will implement an *actual* list here. You can use
+the `table` output to get the same output.
+
+### `table`
+
+Outputs all events formatted as a table. The iCal field names are used headers
+for the table.
 
 ## Processors
 
