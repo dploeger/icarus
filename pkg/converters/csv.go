@@ -18,6 +18,7 @@ type CSVConverter struct {
 	FieldMap        map[string]string
 	HasHeaders      bool
 	Headers         []string
+	Location        *time.Location
 }
 
 var _ BaseConverter = &CSVConverter{}
@@ -64,7 +65,17 @@ func (c *CSVConverter) Convert(input io.Reader, output *ical.Calendar) error {
 					if t, err := time.Parse(c.TimestampFormat, value); err != nil {
 						return fmt.Errorf("can not convert %s to timestamp using format %s: %w", value, c.TimestampFormat, err)
 					} else {
-						e.Props.SetDateTime(key, t)
+						locationTime := time.Date(
+							t.Year(),
+							t.Month(),
+							t.Day(),
+							t.Hour(),
+							t.Minute(),
+							t.Second(),
+							t.Nanosecond(),
+							c.Location,
+						)
+						e.Props.SetDateTime(key, locationTime)
 					}
 				} else {
 					e.Props.SetText(key, value)

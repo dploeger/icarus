@@ -1,6 +1,7 @@
 package converteradapters
 
 import (
+	"fmt"
 	"github.com/akamensky/argparse"
 	"github.com/dploeger/icarus/v2/pkg/converters"
 	"github.com/emersion/go-ical"
@@ -15,6 +16,7 @@ type CSVConverterAdapter struct {
 	timestampFormat *string
 	hasHeaders      *bool
 	headers         *[]string
+	location        *string
 }
 
 var _ ConverterAdapter = &CSVConverterAdapter{}
@@ -40,6 +42,10 @@ func (c *CSVConverterAdapter) Initialize(parser *argparse.Parser) (*argparse.Com
 		Help:    "The format of the timestamps in the CSV file. It uses the golang time format (https://go.dev/src/time/format.go)",
 		Default: time.RFC3339,
 	})
+	c.location = command.String("L", "location", &argparse.Options{
+		Help:    "Assume the location for all timestamps",
+		Default: "UTC",
+	})
 	return command, nil
 }
 
@@ -53,13 +59,18 @@ func (c *CSVConverterAdapter) Convert(input *os.File, output *ical.Calendar) err
 		fieldMap[header] = field
 	}
 
-	converter := converters.CSVConverter{
-		Separator:       *c.separator,
-		TimestampFormat: *c.timestampFormat,
-		FieldMap:        fieldMap,
-		HasHeaders:      *c.hasHeaders,
-		Headers:         *c.headers,
-	}
+	if location, err := time.LoadLocation(*c.location); err != nil {
+		return fmt.Errorf("can not interpret location %s as a golang time location", *c.location)
+	} else {
+		converter := converters.CSVConverter{
+			Separator:       *c.separator,
+			TimestampFormat: *c.timestampFormat,
+			FieldMap:        fieldMap,
+			HasHeaders:      *c.hasHeaders,
+			Headers:         *c.headers,
+			Location:        location,
+		}
 
-	return converter.Convert(input, output)
+		return converter.Convert(input, output)
+	}
 }
