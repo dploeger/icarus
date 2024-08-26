@@ -139,6 +139,10 @@ Converts a file in the CSV format to a calendar. This is done
 by mapping the CSV header to an iCal field. iCal date fields are 
 convertered to timestamps using the configured timestamp format.
 
+If you don't have a timezone information in the CSV file, which is quite
+common, you can set the expected timezone location with the `--location`
+parameter.
+
 To create a working calendar, you at least need to define columns
 with the start timestamp, end timestamp and a summary.
 
