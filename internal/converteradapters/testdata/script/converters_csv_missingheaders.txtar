@@ -1,0 +1,8 @@
+stdin example.csv
+! exec icarus convertCSV
+stdout 'missing headers configuration when no headers exist in the CSV file'
+
+
+-- example.csv --
+DTSTART,DTEND,SUMMARY
+2024-08-26T12:24:00Z,2024-08-26T13:24:00Z,Test

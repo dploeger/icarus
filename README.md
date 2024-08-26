@@ -7,7 +7,8 @@ iCal file processor
 ## Introduction
 
 icarus is a command line utility that processes iCal files
-as defined in [RFC5545](https://www.rfc-editor.org/rfc/rfc5545).
+as defined in [RFC5545](https://www.rfc-editor.org/rfc/rfc5545). Additionally, it can convert files to
+the iCal format.
 
 It utilizes the common unix philosophy of commands doing
 one specific thing with one output piped to another command.
@@ -22,7 +23,7 @@ of a Golang package.
 
 Download the last stable release of icarus for the platform
 and architecture of your choice and then run the `icarus` command 
-following the  processor subcommand and relevant arguments.
+following the  processor or converter subcommand and relevant arguments.
 
 Use `icarus --help` for the available subcommands and
 arguments. Use `icarus <subcommand> --help` for more
@@ -30,8 +31,8 @@ information about the specific subcommand.
 
 ## Selectors
 
-icarus supports selecting events from the incoming data
-to be processed by the selected processor.
+For processors, icarus supports selecting events from the incoming 
+data to be processed by the selected processor.
 
 By default, all events are selected. The following selectors
 are available:
@@ -53,7 +54,7 @@ icarus outputs the data in iCal format by default, you
 can use the `--output-type` argument to specify another
 output type.
 
-Currently, `list` is another output type that can be used
+Currently, `list` is the other output type that can be used
 to show calendar entries in a list.
 
 ## Processors
@@ -72,6 +73,12 @@ Adds a DTSTAMP property as specified by the `--timestamp`
 argument. If an event already has a DTSTAMP property, it may
 be overwritten by using the `--overwrite` argument.
 
+### `addProperty`
+
+Adds a property to all selected events. If an event already has 
+the given property, it may be overwritten by using the 
+`--overwrite` argument.
+
 ### `convertAllDay`
 
 Convert all day events into events with a start and end time
@@ -87,6 +94,12 @@ can be used to make them only span the start date.
 If UTC is not the expected timezone, the [IANA timezone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) 
 name can be set using the `--timezone` argument.
 
+### `deleteProperty`
+
+Deletes a property from all selected events. Be sure to not remove
+properties which are required for events (namely DTSTART, DTEND and
+SUMMARY)
+
 ### `filter`
 
 Only output the events matching the selector or, if the
@@ -97,6 +110,19 @@ Only output the events matching the selector or, if the
 Output *all* events from the source calendar. The selectors are
 ignored for this subcommand. Can be used to make use of icarus'
 output types.
+
+## Converters
+
+The following converters are available:
+
+### `convertCSV`
+
+Converts a file in the CSV format to a calendar. This is done
+by mapping the CSV header to an iCal field. iCal date fields are 
+convertered to timestamps using the configured timestamp format.
+
+To create a working calendar, you at least need to define columns
+with the start timestamp, end timestamp and a summary.
 
 ## Contributing
 

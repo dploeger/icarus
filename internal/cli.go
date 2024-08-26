@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/akamensky/argparse"
 	"github.com/dploeger/icarus/v2/internal/adapters"
+	"github.com/dploeger/icarus/v2/internal/converteradapters"
 	"github.com/dploeger/icarus/v2/pkg/outputTypes"
 	"github.com/dploeger/icarus/v2/pkg/processors"
 	"github.com/emersion/go-ical"
@@ -19,14 +20,19 @@ type processorCommand struct {
 	command *argparse.Command
 }
 
+type converterCommand struct {
+	converter converteradapters.ConverterAdapter
+	command   *argparse.Command
+}
+
 func Main() int {
 	availableOutputTypes := outputTypes.GetOutputTypes()
 	parser := argparse.NewParser("icarus", "iCal file adapter")
 	inputFile := parser.File("f", "file", os.O_RDONLY, 0444, &argparse.Options{
-		Help: "File to read ics data from. Defaults to stdin",
+		Help: "File to read data from. Defaults to stdin",
 	})
 	outputFile := parser.File("o", "output", os.O_RDWR, 0644, &argparse.Options{
-		Help: "File to write ics data to. Defaults to stdout",
+		Help: "File to write data to. Defaults to stdout",
 	})
 	selector := parser.String("s", "selector", &argparse.Options{
 		Default: ".*",
@@ -82,6 +88,19 @@ func Main() int {
 		}
 	}
 
+	var converterCommands []converterCommand
+	for _, converterAdapter := range converteradapters.GetConverterAdapters() {
+		if command, err := converterAdapter.Initialize(parser); err != nil {
+			fmt.Print(parser.Usage(err))
+			return 1
+		} else {
+			converterCommands = append(converterCommands, converterCommand{
+				converter: converterAdapter,
+				command:   command,
+			})
+		}
+	}
+
 	for _, outputType := range availableOutputTypes {
 		if err := outputType.Initialize(parser); err != nil {
 			fmt.Print(parser.Usage(err))
@@ -109,19 +128,7 @@ func Main() int {
 		outputFile = os.Stdout
 	}
 
-	logrus.Debug("Parsing input calendar")
-
-	var inputCalendar ical.Calendar
-	dec := ical.NewDecoder(inputFile)
-	if cal, err := dec.Decode(); err != nil {
-		fmt.Print(parser.Usage(err))
-		return 2
-	} else {
-		inputCalendar = *cal
-	}
-
 	outputCalendar := ical.NewCalendar()
-	outputCalendar.Props = inputCalendar.Props
 
 	var dStart time.Time
 	if dateSelectorStart != nil {
@@ -142,9 +149,33 @@ func Main() int {
 
 	for _, processorCommand := range processorCommands {
 		if processorCommand.command.Happened() {
+			logrus.Debug("Parsing input calendar")
+
+			var inputCalendar ical.Calendar
+			dec := ical.NewDecoder(inputFile)
+			if cal, err := dec.Decode(); err != nil {
+				fmt.Print(parser.Usage(err))
+				return 2
+			} else {
+				inputCalendar = *cal
+			}
+			outputCalendar.Props = inputCalendar.Props
+
 			logrus.Infof("Processor %s was selected. Starting process", processorCommand.command.GetName())
 			processorCommand.adapter.SetToolbox(toolbox)
 			if err := processorCommand.adapter.Process(inputCalendar, outputCalendar); err != nil {
+				fmt.Print(parser.Usage(err))
+				return 3
+			}
+		}
+	}
+
+	for _, converterCommand := range converterCommands {
+		if converterCommand.command.Happened() {
+			outputCalendar.Props.SetText(ical.PropProductID, "https://github.com/dploeger/icarus icarus")
+			outputCalendar.Props.SetText(ical.PropVersion, "2.0")
+			logrus.Infof("Converter %s was selected. Starting process", converterCommand.command.GetName())
+			if err := converterCommand.converter.Convert(inputFile, outputCalendar); err != nil {
 				fmt.Print(parser.Usage(err))
 				return 3
 			}
