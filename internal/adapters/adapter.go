@@ -20,12 +20,12 @@ type Adapter interface {
 // GetAdapters returns a list of enabled processor adapters
 func GetAdapters() []Adapter {
 	return []Adapter{
+		&AddAlarmAdapter{},
+		&AddDTStampAdapter{},
+		&AddPropertyAdapter{},
+		&ConvertAllDayAdapter{},
+		&DeletePropertyAdapter{},
 		&FilterAdapter{},
 		&PrintAdapter{},
-		&ConvertAllDayAdapter{},
-		&AddDTStampAdapter{},
-		&AddAlarmAdapter{},
-		&AddPropertyAdapter{},
-		&DeletePropertyAdapter{},
 	}
 }
