@@ -27,6 +27,7 @@ func TestConvert(t *testing.T) {
 		FieldMap:        nil,
 		HasHeaders:      true,
 		Headers:         nil,
+		Location:        time.UTC,
 	}
 
 	calendar := ical.NewCalendar()
@@ -61,6 +62,7 @@ func TestConvertSeparater(t *testing.T) {
 		FieldMap:        nil,
 		HasHeaders:      true,
 		Headers:         nil,
+		Location:        time.UTC,
 	}
 
 	calendar := ical.NewCalendar()
@@ -85,8 +87,8 @@ func TestConvertTimestampFormat(t *testing.T) {
 		DTSTART,DTEND,SUMMARY
 		%s,%s,Test
 	`,
-		startTime.Format(time.RFC3339),
-		endTime.Format(time.RFC3339),
+		startTime.Format("2006-01-02 15:04"),
+		endTime.Format("2006-01-02 15:04"),
 	)
 
 	converter := CSVConverter{
@@ -95,6 +97,7 @@ func TestConvertTimestampFormat(t *testing.T) {
 		FieldMap:        nil,
 		HasHeaders:      true,
 		Headers:         nil,
+		Location:        time.UTC,
 	}
 
 	calendar := ical.NewCalendar()
@@ -133,6 +136,7 @@ func TestConvertFieldMap(t *testing.T) {
 		},
 		HasHeaders: true,
 		Headers:    nil,
+		Location:   time.UTC,
 	}
 
 	calendar := ical.NewCalendar()
@@ -166,6 +170,7 @@ func TestConvertNoHeaders(t *testing.T) {
 		FieldMap:        nil,
 		HasHeaders:      false,
 		Headers:         []string{"DTSTART", "DTEND", "SUMMARY"},
+		Location:        time.UTC,
 	}
 
 	calendar := ical.NewCalendar()
