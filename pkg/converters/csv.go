@@ -3,12 +3,13 @@ package converters
 import (
 	"encoding/csv"
 	"fmt"
-	"github.com/emersion/go-ical"
-	"github.com/google/uuid"
-	"golang.org/x/exp/maps"
 	"io"
 	"slices"
 	"time"
+
+	"github.com/emersion/go-ical"
+	"github.com/google/uuid"
+	"golang.org/x/exp/maps"
 )
 
 // CSVConverter converts an incoming CSV formatted file into a Calendar object
@@ -19,6 +20,7 @@ type CSVConverter struct {
 	HasHeaders      bool
 	Headers         []string
 	Location        *time.Location
+	SkipRows        int
 }
 
 var _ BaseConverter = &CSVConverter{}
@@ -26,6 +28,11 @@ var _ BaseConverter = &CSVConverter{}
 func (c *CSVConverter) Convert(input io.Reader, output *ical.Calendar) error {
 	reader := csv.NewReader(input)
 	reader.Comma = ([]rune(c.Separator))[0]
+
+	for range c.SkipRows {
+		reader.Read()
+		reader.FieldsPerRecord = 0
+	}
 
 	var headers []string
 
@@ -47,6 +54,9 @@ func (c *CSVConverter) Convert(input io.Reader, output *ical.Calendar) error {
 		for _, row := range rows {
 			fieldValues := make(map[string]string)
 			for i, col := range row {
+				if i >= len(headers) {
+					continue
+				}
 				var field string
 				if slices.Contains(maps.Keys(c.FieldMap), headers[i]) {
 					field = c.FieldMap[headers[i]]

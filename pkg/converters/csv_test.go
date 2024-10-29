@@ -1,12 +1,13 @@
 package converters
 
 import (
-	"github.com/MakeNowJust/heredoc"
-	"github.com/emersion/go-ical"
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/MakeNowJust/heredoc"
+	"github.com/emersion/go-ical"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestConvert(t *testing.T) {
@@ -217,4 +218,41 @@ func TestConvertLocation(t *testing.T) {
 	assert.Equal(t, "2024-08-26 12:24", dtStart.Format("2006-01-02 15:04"), "Wrong start time")
 	dtEnd, _ := event.Props.Get(ical.PropDateTimeEnd).DateTime(cetLocation)
 	assert.Equal(t, "2024-08-26 13:24", dtEnd.Format("2006-01-02 15:04"), "Wrong end time")
+}
+
+func TestConvertSkipRow(t *testing.T) {
+	startTime, _ := time.Parse(time.RFC3339, "2024-08-26T12:24:00Z")
+	endTime, _ := time.Parse(time.RFC3339, "2024-08-26T13:24:00Z")
+
+	subject := heredoc.Docf(`
+		BOGUS
+		DTSTART,DTEND,SUMMARY
+		%s,%s,Test
+	`,
+		startTime.Format(time.RFC3339),
+		endTime.Format(time.RFC3339),
+	)
+
+	converter := CSVConverter{
+		Separator:       ",",
+		TimestampFormat: time.RFC3339,
+		FieldMap:        nil,
+		HasHeaders:      true,
+		Headers:         nil,
+		Location:        time.UTC,
+		SkipRows:        1,
+	}
+
+	calendar := ical.NewCalendar()
+
+	err := converter.Convert(strings.NewReader(subject), calendar)
+	assert.NoError(t, err, "Converter errored out")
+	assert.Len(t, calendar.Children, 1, "Invalid number of children in calendar")
+	event := calendar.Children[0]
+	summary, _ := event.Props.Get(ical.PropSummary).Text()
+	assert.Equal(t, "Test", summary)
+	dtStart, _ := event.Props.Get(ical.PropDateTimeStart).DateTime(startTime.Location())
+	assert.Equal(t, startTime, dtStart, "Wrong start time")
+	dtEnd, _ := event.Props.Get(ical.PropDateTimeEnd).DateTime(endTime.Location())
+	assert.Equal(t, endTime, dtEnd, "Wrong end time")
 }
