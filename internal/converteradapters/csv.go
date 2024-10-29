@@ -2,12 +2,13 @@ package converteradapters
 
 import (
 	"fmt"
-	"github.com/akamensky/argparse"
-	"github.com/dploeger/icarus/v2/pkg/converters"
-	"github.com/emersion/go-ical"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/akamensky/argparse"
+	"github.com/dploeger/icarus/v2/pkg/converters"
+	"github.com/emersion/go-ical"
 )
 
 type CSVConverterAdapter struct {
@@ -17,6 +18,7 @@ type CSVConverterAdapter struct {
 	hasHeaders      *bool
 	headers         *[]string
 	location        *string
+	skipRows        *int
 }
 
 var _ ConverterAdapter = &CSVConverterAdapter{}
@@ -46,6 +48,10 @@ func (c *CSVConverterAdapter) Initialize(parser *argparse.Parser) (*argparse.Com
 		Help:    "Assume the location for all timestamps",
 		Default: "UTC",
 	})
+	c.skipRows = command.Int("K", "skip-rows", &argparse.Options{
+		Help:    "Skip the number of rows before starting to parse",
+		Default: 0,
+	})
 	return command, nil
 }
 
@@ -69,6 +75,7 @@ func (c *CSVConverterAdapter) Convert(input *os.File, output *ical.Calendar) err
 			HasHeaders:      *c.hasHeaders,
 			Headers:         *c.headers,
 			Location:        location,
+			SkipRows:        *c.skipRows,
 		}
 
 		return converter.Convert(input, output)

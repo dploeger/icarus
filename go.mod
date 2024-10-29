@@ -1,6 +1,6 @@
 module github.com/dploeger/icarus/v2
 
-go 1.21
+go 1.23
 
 require (
 	github.com/MakeNowJust/heredoc v1.0.0

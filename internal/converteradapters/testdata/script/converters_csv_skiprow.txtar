@@ -1,0 +1,12 @@
+stdin example.csv
+exec icarus convertCSV -H -K 1
+! stderr .
+stdout 'SUMMARY:Test'
+stdout 'DTSTART:20240826T122400Z'
+stdout 'DTSTART:20240826T122400Z'
+stdout 'DTEND:20240826T132400Z'
+
+-- example.csv --
+BOGUS
+DTSTART,DTEND,SUMMARY
+2024-08-26T12:24:00Z,2024-08-26T13:24:00Z,Test
