@@ -123,6 +123,15 @@ SUMMARY)
 Only output the events matching the selector or, if the
 `--inverse` flag is used, events *not* matching the selector.
 
+### `merge`
+
+Take the input calendar and add events from a second calendar to it. With
+this command, the filter options filter the second calendar, not the
+input calendar.
+
+If two events are in both calendars, it can be decided if the second
+calendar should overwrite the first.
+
 ### `print`
 
 Output *all* events from the source calendar. The selectors are
