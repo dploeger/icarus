@@ -1,10 +1,11 @@
 package processors
 
 import (
-	"github.com/emersion/go-ical"
-	"github.com/sirupsen/logrus"
 	"regexp"
 	"time"
+
+	"github.com/emersion/go-ical"
+	"github.com/sirupsen/logrus"
 )
 
 // A Toolbox of common functions
@@ -36,10 +37,15 @@ func (t Toolbox) EventMatchesSelector(event ical.Event) bool {
 	}
 
 	if t.TextSelectorPattern != nil {
+		logrus.Debug("Selecting events")
 		for _, prop := range t.TextSelectorProps {
-			if event.Props.Get(prop) != nil && t.TextSelectorPattern.MatchString(event.Props.Get(prop).Value) {
-				logrus.Debugf("Event %s matched selector", event.Name)
-				return true
+			eventProp := event.Props.Get(prop)
+			if eventProp != nil {
+				logrus.Debugf("Testing event prop %s (%s) on pattern %s", prop, eventProp.Value, t.TextSelectorPattern)
+				if t.TextSelectorPattern.MatchString(event.Props.Get(prop).Value) {
+					logrus.Infof("Event %s matched selector", event.Name)
+					return true
+				}
 			}
 		}
 	}

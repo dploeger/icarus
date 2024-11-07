@@ -27,5 +27,6 @@ func GetAdapters() []Adapter {
 		&DeletePropertyAdapter{},
 		&FilterAdapter{},
 		&PrintAdapter{},
+		&MergeAdapter{},
 	}
 }

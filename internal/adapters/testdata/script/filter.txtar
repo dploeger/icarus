@@ -1,7 +1,7 @@
 stdin example.ics
 exec icarus filter -s Test2
 ! stderr .
-! stdout SUMMARY:Test$
+! stdout 'SUMMARY:Test\r\n'
 
 -- example.ics --
 BEGIN:VCALENDAR
