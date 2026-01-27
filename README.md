@@ -112,6 +112,14 @@ can be used to make them only span the start date.
 If UTC is not the expected timezone, the [IANA timezone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) 
 name can be set using the `--timezone` argument.
 
+### `copyProperty`
+
+Copies a property value to another property. If that property exists,
+it will not be overwritten unless the `--overwrite` flag is specified.
+
+Specify the source property name with `--source` (e.g. SUMMARY) and 
+the target property with `--target`.
+
 ### `deleteProperty`
 
 Deletes a property from all selected events. Be sure to not remove

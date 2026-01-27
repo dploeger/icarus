@@ -24,6 +24,7 @@ func GetAdapters() []Adapter {
 		&AddDTStampAdapter{},
 		&AddPropertyAdapter{},
 		&ConvertAllDayAdapter{},
+		&CopyPropertyAdapter{},
 		&DeletePropertyAdapter{},
 		&FilterAdapter{},
 		&PrintAdapter{},
