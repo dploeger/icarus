@@ -1,7 +1,7 @@
 stdin example.ics
 exec icarus copyProperty -S SUMMARY -T DESCRIPTION -O
 ! stderr .
-stdout DESCRIPTION:TEST
+stdout -count=1 DESCRIPTION:TEST
 
 -- example.ics --
 BEGIN:VCALENDAR
